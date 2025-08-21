@@ -30,7 +30,6 @@ namespace Vox.API.Middlewares
                         context.Response.ContentType = "application/json";
                         await context.Response.WriteAsJsonAsync(new
                         {
-                            Ok = false,
                             Error = "Token inválido."
                         });
                         return;
@@ -44,7 +43,6 @@ namespace Vox.API.Middlewares
                         context.Response.ContentType = "application/json";
                         await context.Response.WriteAsJsonAsync(new
                         {
-                            Ok = false,
                             Error = "Token expirado."
                         });
                         return;
@@ -56,7 +54,6 @@ namespace Vox.API.Middlewares
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsJsonAsync(new
                     {
-                        Ok = false,
                         Error = "Token inválido."
                     });
                     return;

@@ -14,19 +14,22 @@ public class UsuarioController(IUsuarioService _service, AutenticacaoHandler _au
 { 
     [HttpPost("login")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(LoginOutputDTO), 200)]
+    [ProducesResponseType(typeof(ErroLoginOutputDTO), 401)]
     public async Task<ActionResult<LoginOutputDTO>> Login([FromBody] LoginDTO acesso)
     {
         var usuario = await _service.VerificarAcesso(acesso);
-    
+
         if (usuario == null)
-            return Unauthorized(new {
+            return Unauthorized(new
+            {
                 Erro = "Login e/ou senha incorretos"
             });
 
-        var token = _autenticacaoHandler.GerarTokenJWT(usuario);
+        var token = await _autenticacaoHandler.GerarTokenJWT(usuario);
         var result = new LoginOutputDTO
         {
-            Token = token.Result,
+            Token = token,
             Tipo = usuario.Tipo
         };
 

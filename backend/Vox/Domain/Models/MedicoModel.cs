@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 using Vox.Domain.Enums;
 
-// herdar de baseEntity
+
 public class MedicoModel
 {
     public int Id { get; set; }

@@ -13,3 +13,8 @@ public class LoginOutputDTO
     public string Token { get; set; } = null!;
     public TipoUsuarioEnum Tipo { get; set; }
 }
+
+public class ErroLoginOutputDTO
+{
+    public string Erro { get; set; } = string.Empty;
+}

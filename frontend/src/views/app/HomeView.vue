@@ -131,6 +131,7 @@ connection.on("HorarioAtualizado", (horario) => {
 
 connection.on("ConsultaCancelada", (consulta) => {
     toast.warning(`Você teve uma consulta cancelada.`, 3000)
+    
     calendarApp.events.remove(`c-${consulta.id}`);
 
     if (auth.tipoUsuario === 'Paciente') {
@@ -151,7 +152,9 @@ connection.on("ConsultaCancelada", (consulta) => {
 });
 
 connection.on("ConsultaCriada", (consulta) => {
-    toast.warning(`Você tem uma nova consulta.`, 3000)
+    if (auth.tipoUsuario === "Medico"){
+        toast.warning(`Você tem uma nova consulta.`, 3000)
+    }
 
     const allEvents = calendarApp.events.getAll();
     const eventToUpdate = allEvents.find(e => parseInt(e.id.replace("h-", "")) === consulta.horarioId);
@@ -163,7 +166,8 @@ connection.on("ConsultaCriada", (consulta) => {
             tipo: "consulta"
         };
 
-        calendarApp.events.update(eventToUpdate);
+        calendarApp.events.remove(`h-${consulta.horarioId}`)
+        calendarApp.events.add(eventToUpdate);
     }
 });
 

@@ -1,3 +1,5 @@
+using Vox.Application.DTOs;
+
 namespace Vox.API.Controllers;
 
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +19,7 @@ public class ConsultaController(IConsultaService _service, IQueueManager _queueM
     [Authorize(Roles = "Medico")]
     [ApiExplorerSettings(GroupName = "Medico")]
     [ProducesResponseType(typeof(ConsultaOutputDTO[]), 200)]
-    [ProducesResponseType(403)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 403)]
     public async Task<ActionResult<ConsultaModel[]>> GetAllMedico([FromQuery] StatusConsultaEnum? status)
     {
         var consultas = await _service.BuscarTodosPorMedico(status, HttpContext.Items["Token"] as string);
@@ -29,7 +31,7 @@ public class ConsultaController(IConsultaService _service, IQueueManager _queueM
     [Authorize(Roles = "Paciente")]
     [ApiExplorerSettings(GroupName = "Paciente")]
     [ProducesResponseType(typeof(ConsultaOutputDTO[]), 200)]
-    [ProducesResponseType(403)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 403)]
     public async Task<ActionResult<ConsultaModel[]>> GetAllPaciente(StatusConsultaEnum? status)
     {
         var consultas = await _service.BuscarTodosPorPaciente(status, HttpContext.Items["Token"] as string);
@@ -41,21 +43,33 @@ public class ConsultaController(IConsultaService _service, IQueueManager _queueM
     [Authorize]
     [ApiExplorerSettings(GroupName = "Consulta")]
     [ProducesResponseType(typeof(ConsultaOutputDTO), 200)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(404)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 400)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 401)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 403)]
+    [ProducesResponseType(typeof(object), 404)]
     public async Task<ActionResult<ConsultaModel>> GetById(int id)
     {
-        var consulta = await _service.BuscarPorId(id, HttpContext.Items["Token"] as string);
-        if (consulta == null) return NotFound();
-        return Ok(ConsultaOutputDTO.FromModel(consulta));
+        try
+        {
+            var consulta = await _service.BuscarPorId(id, HttpContext.Items["Token"] as string);
+            if (consulta == null) return NotFound();
+            return Ok(ConsultaOutputDTO.FromModel(consulta));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new {
+                Erro = ex.Message
+            });
+        }
     }
 
     [HttpPost("consultas")]
     [Authorize(Roles = "Paciente")]
     [ApiExplorerSettings(GroupName = "Consulta")]
     [ProducesResponseType(typeof(ConsultaOutputDTO), 200)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(404)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 400)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 401)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 403)]
     public async Task<ActionResult<ConsultaModel>> Post([FromBody] CadastroConsultaDTO consultaDto)
     {
         try
@@ -64,25 +78,12 @@ public class ConsultaController(IConsultaService _service, IQueueManager _queueM
                 _service.Adicionar(consultaDto, HttpContext.Items["Token"] as string)
             );
             
-            return Ok(new {
-                success = true,
-                message = "Consulta criada com sucesso!",
-                data = consulta
-            });
+            return Ok(consulta);
         }
         catch (InvalidOperationException ex)
         {
             return BadRequest(new {
-                success = false,
-                message = ex.Message
-            });
-        }
-        catch (Exception ex) 
-        {
-            return StatusCode(500, new {
-                success = false,
-                message = "Ocorreu um erro inesperado.",
-                details = ex.Message
+                erro = ex.Message
             });
         }
     }
@@ -90,9 +91,11 @@ public class ConsultaController(IConsultaService _service, IQueueManager _queueM
     [HttpPatch("consultas/{id}/status")]
     [Authorize]
     [ApiExplorerSettings(GroupName = "Consulta")]
-    [ProducesResponseType(typeof(object), 200)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(404)]
+    [ProducesResponseType(typeof(ConsultaModel), 200)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 400)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 401)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 403)]
+    [ProducesResponseType(typeof(object), 404)]
     public async Task<ActionResult> PatchStatus(int id, [FromBody] AtualizarStatusDTO dto)
     {
         try
@@ -101,13 +104,9 @@ public class ConsultaController(IConsultaService _service, IQueueManager _queueM
                 _service.AtualizarStatus(id, dto.Status, HttpContext.Items["Token"] as string)
             );
 
-            if (consulta == null) 
-                return NotFound(new { success = false, message = "Consulta não encontrada." });
+            if (consulta == null) return NotFound();
 
-            return Ok(new {
-                success = true,
-                horario = consulta.Horario
-            });
+            return Ok(consulta);
         }
         catch (Exception ex)
         {

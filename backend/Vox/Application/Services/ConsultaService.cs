@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
 using Vox.API.Hubs;
 
 namespace Vox.Application.Services;
@@ -65,7 +66,7 @@ public class ConsultaService : IConsultaService
     {
         var paciente = await _pacienteHandler.GetPacienteFromToken(token);
         if (paciente == null)
-            return null;
+            throw new SecurityTokenException("Token informado para essa consulta e invalido.");
 
         var cacheKey = $"Consulta:{id}";
         var cached = await _cacheManager.GetAsync<ConsultaModel>(cacheKey);
@@ -146,8 +147,7 @@ public class ConsultaService : IConsultaService
         var consulta = await _repository.BuscarPorId(id);
         var statusAntigo = consulta.Status;
     
-        if (consulta == null)
-            return null;
+        if (consulta == null) return null;
 
         if (consulta.Status != StatusConsultaEnum.Agendada)
             throw new Exception("Apenas é possivel alterar consultas que estão agendadas.");

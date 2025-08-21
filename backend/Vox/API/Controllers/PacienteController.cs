@@ -1,3 +1,5 @@
+using Vox.Application.DTOs;
+
 namespace Vox.API.Controllers;
 
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +29,8 @@ public class PacienteController(IPacienteService _service) : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(PacienteOutputDTO), 200)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 400)]
     public async Task<ActionResult<PacienteModel>> Post([FromBody] CadastroPacienteDTO pacienteDto)
     {
         var paciente = await _service.Adicionar(pacienteDto);
@@ -35,6 +39,10 @@ public class PacienteController(IPacienteService _service) : ControllerBase
     
     [HttpPut]
     [Authorize(Roles = "Paciente")]
+    [ProducesResponseType(typeof(PacienteOutputDTO), 200)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 400)]
+    [ProducesResponseType(typeof(ErroResponseDTO),403)]
+    [ProducesResponseType(typeof(object),404)]
     public async Task<ActionResult<PacienteModel>> Put([FromBody] AtualizarPacienteDTO dto)
     {
         var paciente = await _service.Atualizar(dto, HttpContext.Items["Token"] as string);

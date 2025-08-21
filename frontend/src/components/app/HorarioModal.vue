@@ -76,7 +76,7 @@ async function confirmCancel(consultaId) {
     const id = parseInt(consultaId.replace('c-', ''))
 
     const response = await consultaService.alterarStatus(id, 'Cancelada')
-    if (response.success) {
+    if (response.status === 'Cancelada') {
         handleCancelEvent(consultaId)
 
         if (auth.tipoUsuario === 'Medico') {
@@ -89,7 +89,6 @@ async function confirmCancel(consultaId) {
             })
         }
 
-        toast.success('Consulta cancelada com sucesso!')
         closeConfirmModal()
         closeEventModal()
     } else {

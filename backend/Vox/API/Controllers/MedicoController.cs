@@ -25,9 +25,10 @@ public class MedicoController(IMedicoService service) : ControllerBase
         return Ok(result);
     }
     
-    // Deixar comentario
     [HttpGet("{id}")]
     [Authorize]
+    [ProducesResponseType(typeof(ErroResponseDTO), 403)]
+    [ProducesResponseType(typeof(object), 404)]
     public async Task<ActionResult<MedicoModel>> GetById(int id)
     {
         var medico = await service.BuscarPorId(id);
@@ -38,19 +39,42 @@ public class MedicoController(IMedicoService service) : ControllerBase
         return Ok(MedicoOutputDTO.FromModel(medico));
     }
     
-    // Deixar comentario
     [HttpPost]
+    [ProducesResponseType(typeof(MedicoOutputDTO), 200)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 400)]
     public async Task<ActionResult<MedicoModel>> Post([FromBody] CadastroMedicoDTO medicoDto)
     {
-        var medico = await service.Adicionar(medicoDto);
-        return CreatedAtAction(nameof(GetById), new { id = medico.Id }, MedicoOutputDTO.FromModel(medico));
+        try
+        {
+            var medico = await service.Adicionar(medicoDto);
+            return CreatedAtAction(nameof(GetById), new { id = medico.Id }, MedicoOutputDTO.FromModel(medico));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new {
+                Erro = ex.Message
+            });
+        }
     }
     
     [HttpPut]
     [Authorize(Roles = "Medico")]
+    [ProducesResponseType(typeof(MedicoOutputDTO), 200)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 400)]
+    [ProducesResponseType(typeof(ErroResponseDTO), 403)]
     public async Task<ActionResult<MedicoModel>> Put([FromBody] AtualizaMedicoDTO medicoDto)
     {
-        var medicoAtualizado = await service.Atualizar(medicoDto, HttpContext.Items["Token"] as string);
-        return Ok(MedicoOutputDTO.FromModel(medicoAtualizado));
+        try
+        {
+            var medicoAtualizado = await service.Atualizar(medicoDto, HttpContext.Items["Token"] as string);
+            return Ok(MedicoOutputDTO.FromModel(medicoAtualizado));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new {
+                Erro = ex.Message
+            });
+        }
+        
     }
 }

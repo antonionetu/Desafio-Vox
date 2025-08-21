@@ -52,10 +52,6 @@ public class PacienteService : IPacienteService
         var jwtToken = handlerJwt.ReadJwtToken(token);
         var tipoUsuario = jwtToken.Claims.FirstOrDefault(c => c.Type == "tipo")?.Value;
 
-        if (tipoUsuario == "Medico")
-            // ...
-            throw new UnauthorizedAccessException("Para ter acesso aos dados de um paciente, o medico precisa ter uma consulta com ele.");
-
         var cacheKey = $"Paciente:{id}";
         var cached = await _cacheManager.GetAsync<PacienteModel>(cacheKey);
         if (cached != null)
