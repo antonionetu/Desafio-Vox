@@ -46,10 +46,9 @@ export const horarioService = {
                 { headers: { Authorization: `Bearer ${token.asString()}` } }
             )
 
-            return response.data
+            return response
         }
         catch (error) {
-            console.error('Erro ao atualizar horário:', error.response?.data || error)
             return error.response
         }
     }

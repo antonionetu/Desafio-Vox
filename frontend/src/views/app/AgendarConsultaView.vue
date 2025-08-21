@@ -80,7 +80,7 @@ const carregarPerfil = async (id) => {
 }
 
 const carregarHorarios = async (id) => {
-	const response = await medicoService.getHorariosByMedicoId()
+	const response = await medicoService.getHorariosByMedicoId(id)
 	horarios.value = response
 
 	const eventos = horarios.value.map((h) => ({

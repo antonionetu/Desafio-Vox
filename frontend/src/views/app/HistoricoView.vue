@@ -4,7 +4,13 @@
 			Histórico
 		</h2>
 
-		<ul class="list bg-base-100 rounded-box shadow-md mt-8 max-h-[88vh] overflow-y-auto">
+		<!-- Se não tiver consultas -->
+		<div v-if="consultas.length === 0" class="mt-8 text-center text-gray-400 italic">
+			Você não possui histórico de consultas.
+		</div>
+
+		<!-- Se tiver consultas -->
+		<ul v-else class="list bg-base-100 rounded-box shadow-md mt-8 max-h-[88vh] overflow-y-auto">
 			<li v-for="consulta in consultas" :key="consulta.id" class="list-row">
 				<img class="size-10 rounded-box d-flex my-auto"
 					src="https://img.daisyui.com/images/profile/demo/1@94.webp" />

@@ -57,8 +57,8 @@ const agendarConsulta = async (horarioId) => {
     await consultaService.agendar(horarioId).then(() => {
         toast.success('Consulta agendada com sucesso!')
         router.push({ name: 'home' })
-    }).catch((error) => {
-        toast.error(error.response?.data?.message)
+    }).catch((message) => {
+        toast.error(message.response.data.erro)
     })
 }
 

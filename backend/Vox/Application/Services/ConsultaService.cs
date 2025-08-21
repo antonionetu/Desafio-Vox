@@ -20,7 +20,7 @@ public interface IConsultaService
     Task<ConsultaModel?> BuscarPorId(int id, string token);
     Task<ConsultaModel[]?> BuscarTodosPorMedico(StatusConsultaEnum? status, string token);
     Task<ConsultaModel[]?> BuscarTodosPorPaciente(StatusConsultaEnum? status, string token);
-    Task<ConsultaModel?> Adicionar(CadastroConsultaDTO dto, string token);
+    Task Adicionar(CadastroConsultaDTO dto, string token);
     Task<ConsultaModel?> AtualizarStatus(int id, StatusConsultaEnum novoStatus, string token);
 }
 
@@ -112,7 +112,7 @@ public class ConsultaService : IConsultaService
         return await _repository.BuscarPorMedico(medico.Id, status);
     }
 
-    public async Task<ConsultaModel> Adicionar(CadastroConsultaDTO dto, string token)
+    public async Task Adicionar(CadastroConsultaDTO dto, string token)
     {
         var paciente = await _pacienteHandler.GetPacienteFromToken(token);
         if (paciente == null)
@@ -125,22 +125,23 @@ public class ConsultaService : IConsultaService
             .Where(c => c.Status == StatusConsultaEnum.Agendada)
             .ToArray();
         var horariosExistentes = consultasAgendadas.Select(c => c.Horario).ToArray();
-        
-        bool conflito = await _horarioHandler.HorarioConflita(novoHorario, horariosExistentes);
+    
+        bool conflito = await _horarioHandler.HorarioConflita(novoHorario, horariosExistentes); 
         if (conflito)
             throw new InvalidOperationException("Você já tem uma consulta marcada para este horário.");
 
         var consulta = _factory.Criar(dto, paciente.Id);
         consulta = await _repository.Adicionar(consulta);
-        
-        await _horarioHubContext.Clients.User(consulta.Horario.MedicoId.ToString()).SendAsync("ConsultaCriada", consulta);
-        
-        await _cacheManager.RemoveAsync($"HorariosDisponiveis:{consulta.Horario.Medico.Id}");
+    
+        await _horarioHubContext.Clients.User(consulta.Horario.MedicoId.ToString())
+            .SendAsync("ConsultaCriada", consulta);
+    
+        await _cacheManager.RemoveAsync($"HorariosDisponiveis:{consulta.Horario.MedicoId}");
         await _cacheManager.RemoveAsync($"ConsultasPorPaciente:{paciente.Id}:{StatusConsultaEnum.Agendada}");
-        await _cacheManager.RemoveAsync($"ConsultasPorMedico:{consulta.Horario.Medico.Id}:{StatusConsultaEnum.Agendada}");
-
-        return consulta;
+        await _cacheManager.RemoveAsync($"ConsultasPorMedico:{consulta.Horario.MedicoId}:{StatusConsultaEnum.Agendada}");
     }
+
+
 
     public async Task<ConsultaModel?> AtualizarStatus(int id, StatusConsultaEnum novoStatus, string token)
     {

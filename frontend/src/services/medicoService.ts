@@ -18,31 +18,34 @@ export const medicoService = {
         }
     },
 
-    async getMedicoById() {
+    async getMedicoById(id) {
         const token = new Token();
-        const medicoId = token.asObject()?.id;
+
+        if (!id) {
+            id = token.asObject()?.id;
+        }
 
         try {
-            const response = await api.get(`/medicos/${medicoId}`, {
+            const response = await api.get(`/medicos/${id}`, {
                 headers: { Authorization: `Bearer ${token.asString()}` }
             });
 
             return response.data;
         } catch (error) {
-            console.error(`Erro ao buscar médico ${medicoId}:`, error.response?.data || error);
+            console.error(`Erro ao buscar médico ${id}:`, error.response?.data || error);
             return null;
         }
     },
 
-    async getHorariosByMedicoId(medicoId=null) {
+    async getHorariosByMedicoId(id) {
         const token = new Token()
         
-        if (!medicoId) {
-            medicoId = token.asObject()?.id;
+        if (!id) {
+            id = token.asObject()?.id;
         }
 
         try {
-            const response = await api.get(`/medicos/${medicoId}/horarios`, {
+            const response = await api.get(`/medicos/${id}/horarios`, {
                 params: { oucupado: false },
                 headers: { Authorization: `Bearer ${token.asString()}` }
             })

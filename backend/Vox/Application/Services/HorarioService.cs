@@ -115,7 +115,7 @@ public class HorarioService : IHorarioService
         );
 
         if (temChoqueDeHorario)
-            throw new Exception("Voce ja tem um horario cadastrado nesse momento");
+            throw new InvalidOperationException("Voce ja tem um horario cadastrado nesse momento");
 
         var consultasDoMedico = await _consultaRepository.BuscarPorMedico(medico.Id);
         var horariosOcupados = consultasDoMedico
@@ -144,16 +144,26 @@ public class HorarioService : IHorarioService
         if (horario == null || horario.MedicoId != medico.Id) throw new Exception("Este horario nao pertence a esse medico");
 
         _factory.Atualizar(horario, dto);
-
+        
+        var todosHorariosDoMedico = await _repository.BuscaTodosPorMedico(medico.Id);
+        var outrosHorarios = todosHorariosDoMedico
+            .Where(h => h.Id != horario.Id)
+            .ToArray();
+        
         var consultasDoMedico = await _consultaRepository.BuscarPorMedico(medico.Id);
-        var horariosOcupados = consultasDoMedico
-            .Where(c => c.Status == StatusConsultaEnum.Agendada && c.HorarioId != horario.Id)
+        var horariosComConsultas = consultasDoMedico
+            .Where(c => c.HorarioId != horario.Id)
             .Select(c => c.Horario)
+            .ToArray();
+
+        var horariosOcupados = outrosHorarios
+            .Concat(horariosComConsultas)
+            .Distinct()
             .ToArray();
 
         bool conflitaHorarioMedico = await _handler.HorarioConflita(horario, horariosOcupados);
         if (conflitaHorarioMedico)
-            throw new Exception("Choque de horarios.");
+            throw new InvalidOperationException("Choque de horarios.");
 
         var consultas = await _consultaHandler.BuscarPorHorarioId(horario.Id, StatusConsultaEnum.Agendada);
         var consulta = consultas.FirstOrDefault();
@@ -168,7 +178,7 @@ public class HorarioService : IHorarioService
 
             bool conflitaHorarioPaciente = await _handler.HorarioConflita(horario, horariosPaciente);
             if (conflitaHorarioPaciente)
-                throw new Exception("Este horário conflita com a agenda do paciente.");
+                throw new InvalidOperationException("Este horário conflita com a agenda do paciente.");
 
             await _notificacaoService.CriarNotificacao(
                 $"A sua consulta de {consulta.Horario.Data:dd/MM/yyyy} às {consulta.Horario.HoraInicio} foi reagendada.",

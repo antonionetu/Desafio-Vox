@@ -85,7 +85,8 @@ async function updateConsultas(updatedEvent) {
         ? updatedEvent.id.split('-')[1]
         : updatedEvent._options?.horarioId
 
-    await horarioService.atualiza(horarioId, { data, horaInicio, horaFim })
+    const horario = await horarioService.atualiza(horarioId, { data, horaInicio, horaFim })
+    return horario
 }
 
 const calendarApp = createCalendar({
@@ -105,8 +106,19 @@ const calendarApp = createCalendar({
     formats: { date: 'dd-MM-yyyy', time: 'HH:mm' },
     events: [],
     callbacks: {
-        onEventUpdate(updatedEvent) {
-            updateConsultas(updatedEvent)
+        async onBeforeEventUpdate(oldEvent, newEvent, $app) {
+            try {
+                const response = await updateConsultas(newEvent);
+                if (response.status === 200) {
+                    return true;
+                } else {
+                    toast.error(response.data.erro);
+                    return false;
+                }
+            } catch (error) {
+                toast.error('Falha ao atualizar o horário. Tente novamente.');
+                return false;
+            }
         }
     }
 })
@@ -118,7 +130,7 @@ const connection = new signalR.HubConnectionBuilder()
     .withAutomaticReconnect()
     .build();
 
-connection.on("HorarioAtualizado", (horario) => {
+connection.on("HorarioAtualizado", (horarioResponse) => {
     const allEvents = calendarApp.events.getAll();
     const eventToUpdate = allEvents.find(e => e._options?.horarioId === horario.id);
 
@@ -131,7 +143,7 @@ connection.on("HorarioAtualizado", (horario) => {
 
 connection.on("ConsultaCancelada", (consulta) => {
     toast.warning(`Você teve uma consulta cancelada.`, 3000)
-    
+
     calendarApp.events.remove(`c-${consulta.id}`);
 
     if (auth.tipoUsuario === 'Paciente') {
@@ -152,7 +164,7 @@ connection.on("ConsultaCancelada", (consulta) => {
 });
 
 connection.on("ConsultaCriada", (consulta) => {
-    if (auth.tipoUsuario === "Medico"){
+    if (auth.tipoUsuario === "Medico") {
         toast.warning(`Você tem uma nova consulta.`, 3000)
     }
 

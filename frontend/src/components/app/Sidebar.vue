@@ -13,7 +13,7 @@
             'md:translate-x-0 md:static md:flex'
         ]">
             <div class="mb-8">
-                <p class="text-lg text-center font-semibold">Bem-vindo de volta, {{ user.name }}</p>
+                <p class="text-lg text-center font-semibold">Bem-vindo de volta,</br> {{ user.name }}</p>
             </div>
 
             <nav class="flex flex-col gap-1">

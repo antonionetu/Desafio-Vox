@@ -74,11 +74,11 @@ public class ConsultaController(IConsultaService _service, IQueueManager _queueM
     {
         try
         {
-            var consulta = await _queueManager.Enqueue(() =>
+            await _queueManager.Enqueue(() =>
                 _service.Adicionar(consultaDto, HttpContext.Items["Token"] as string)
             );
             
-            return Ok(consulta);
+            return Ok();
         }
         catch (InvalidOperationException ex)
         {

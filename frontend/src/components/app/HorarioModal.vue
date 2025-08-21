@@ -123,11 +123,11 @@ function formatEventDate(start, end) {
 
 function formatDate(dateString, timeString) {
     const date = new Date(dateString);
-    date.setDate(date.getDate() + 1);
+    date.setDate(date.getDate());
 
     const yyyy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
+    const dd = String(date.getDate() + 1).padStart(2, '0');
 
     const [hours, minutes] = timeString.split(':');
 

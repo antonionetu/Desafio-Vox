@@ -96,7 +96,7 @@ const save = async () => {
                 _options: { tipo: 'horario' }
             })
         } else {
-            toast.error(response.data.meessage)
+            toast.error(response.data.erro)
         }
         closeModal()
     })
