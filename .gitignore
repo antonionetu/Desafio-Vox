@@ -1,0 +1,58 @@
+# ---- Global ----
+# Sistema
+.DS_Store
+Thumbs.db
+
+# IDEs e editores
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ---- Frontend (Vue) ----
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# Cache
+frontend/.cache/
+frontend/.vite/
+frontend/.nuxt/
+frontend/.output/
+
+# ---- .NET ----
+# Build e binários
+**/bin/
+**/obj/
+**/TestResults/
+
+# Logs
+**/*.log
+
+# Configurações locais do usuário / IDE
+*.user
+*.rsuser
+*.suo
+.vs/
+.vscode/
+
+# Arquivos de configuração sensíveis
+appsettings.*.json
+.env
+
+# Executáveis e DLLs gerados
+*.exe
+*.dll
+*.pdb
+*.dbmdl

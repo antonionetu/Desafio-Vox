@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+
+@plugin "daisyui" {
+  themes: light --default;
+}
+
+@plugin "@tailwindcss/typography";
+@plugin "@egoist/tailwindcss-icons" {
+  prefixes: mdi;
+}
+
+body {
+  background-color: #EEE;
+  color: black;
+  
+  width: 100vw;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.sx-vue-calendar-wrapper {
+  height: 85vh;
+}
+
+@utility btn-primary {
+  @apply bg-green-500 border-none;
+}
