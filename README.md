@@ -7,7 +7,7 @@ O sistema permite que **médicos gerenciem seus horários** e que **pacientes vi
 # 🌐 Deploy
 
 O sistema pode ser acessado no enderesso:
-👉 [http://179.232.19.87:5173](http://179.232.19.87:5173)
+👉 <a href="http://179.232.19.87:5173" target="_blank">http://179.232.19.87:5173</a>
 </br>
 (pequeno servidor local a fim de testes)
 
